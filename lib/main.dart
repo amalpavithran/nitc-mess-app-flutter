@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mess_management_flutter/dashboard.dart';
 import 'package:mess_management_flutter/login.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final _storage = new FlutterSecureStorage();
+  final _token  = await _storage.read(key: 'token');
+  Widget defaultHome = Login();
+  if(_token!=null){
+    defaultHome = Dashboard();
+  }
   runApp(MaterialApp(
     theme: ThemeData(
       primaryColor: Colors.black,
@@ -22,7 +30,7 @@ void main() async {
       fontFamily: ''
     ),
     title:'NITC MESS',
-    home: Login(),
+    home: defaultHome,
     routes: {
       '/login':(context)=>Login(),
       '/dashboard':(context)=>Dashboard()

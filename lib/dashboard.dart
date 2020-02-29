@@ -13,14 +13,28 @@ class Dashboard extends StatefulWidget {
 class Extra {
   String rollNumber;
   String message;
-  double amount;
-  DateTime date;
+  int amount;
+  int date;
 
   Extra({
     this.rollNumber,
     this.message,
     this.amount,
     this.date,
+  });
+}
+
+class User {
+  String name;
+  String email;
+  String rollNumber;
+  String mess;
+
+  User({
+    this.name,
+    this.email,
+    this.rollNumber,
+    this.mess
   });
 }
 
@@ -37,7 +51,7 @@ class _DashboardState extends State<Dashboard> {
       if(_token==null){
         Navigator.pushReplacementNamed(context, '/login');
       }
-      final response = await http.get(_url + "/api/users/dues/",headers: {HttpHeaders.authorizationHeader: _token});
+      http.Response response = await http.get(_url + "/api/users/dues/",headers: {HttpHeaders.authorizationHeader: "Bearer " + _token});
       if (response.statusCode == 200) {
         var responsejson = jsonDecode(response.body);
         for (var item in responsejson) {
@@ -47,6 +61,7 @@ class _DashboardState extends State<Dashboard> {
             amount: item['amount'],
             date: item['date']
           );
+          print(item);
           extras.add(extra);
         }
         return extras;
@@ -60,7 +75,7 @@ class _DashboardState extends State<Dashboard> {
         if (snapshot.connectionState == ConnectionState.none &&
             snapshot.hasData == null) {
           return Container();
-        }
+        }else{
         return ListView.builder(
           itemCount: snapshot.data.length,
           itemBuilder: (context, index) {
@@ -68,18 +83,42 @@ class _DashboardState extends State<Dashboard> {
             return ListTile(
               leading: Icon(Icons.attach_money),
               title: Text(extra.message),
+              contentPadding: EdgeInsets.all(5),
+              
               trailing: Text(extra.amount.toString()),
             );
           },
-        );
+        );}
       },
       future: getExtras(),
     );
 
+    final self = Card(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Align(child: Icon(Icons.person),alignment: Alignment.centerLeft),
+          Column(
+            children: <Widget>[
+              Text()
+            ],
+          )
+        ],
+      ),
+    )
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.exit_to_app,
+            color: Colors.black),
+            onPressed: () async{
+              await _storage.delete(key: 'token');
+              Navigator.pushReplacementNamed(context, '/login');
+            })
+        ],
         title: Text("NITC MESS",
             style: GoogleFonts.abel(
                 textStyle: TextStyle(fontWeight: FontWeight.bold))),
