@@ -42,12 +42,35 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     final _url = "https://nitc-mess.herokuapp.com";
-    final _storage = FlutterSecureStorage();
+    final _storage = new FlutterSecureStorage();
+    int _totalExtra = 0;
+    int _totalDaily = 0;
+    int _totalDays = 0;
+    bool _isLoading = true;
+    String _token;
+    User _user;
 
-    
+    Future<void> _getToken() async{
+      _token = await _storage.read(key: 'token');
+    }
+    Future<void> _getUser() async{
+      http.get(_url+'/api/users/me',headers: {HttpHeaders.authorizationHeader: 'Bearer ' + _token}).
+      then((response){
+        if(response.statusCode==200){
+          final jsonResponse = json.decode(response.body);
+            _user = User(
+            name: jsonResponse['name'],
+            email: jsonResponse['email'],
+            rollNumber: jsonResponse['rollNumber'],
+            mess: jsonResponse['mess']
+          );
+        } 
+      });
+    }
+
     Future<List<Extra>> getExtras() async {
       List<Extra> extras = [];
-      final _token  = await _storage.read(key: 'token');
+      await _getToken();
       if(_token==null){
         Navigator.pushReplacementNamed(context, '/login');
       }
@@ -55,14 +78,19 @@ class _DashboardState extends State<Dashboard> {
       if (response.statusCode == 200) {
         var responsejson = jsonDecode(response.body);
         for (var item in responsejson) {
-          var extra = Extra(
-            rollNumber: item['rollNumber'],
-            message: item['message'],
-            amount: item['amount'],
-            date: item['date']
-          );
-          print(item);
-          extras.add(extra);
+          if(item['message']=='DailyCharge'){
+            _totalDays += 1;
+            _totalDaily += item['amount'];
+          }else{
+            var extra = Extra(
+              rollNumber: item['rollNumber'],
+              message: item['message'],
+              amount: item['amount'],
+              date: item['date']
+            );
+            _totalExtra += item['amount'];
+            extras.add(extra);
+          }
         }
         return extras;
       }else{
@@ -100,12 +128,32 @@ class _DashboardState extends State<Dashboard> {
           Align(child: Icon(Icons.person),alignment: Alignment.centerLeft),
           Column(
             children: <Widget>[
-              Text()
+              Text(
+                _user.name,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(_user.rollNumber),
+              Text(_user.mess),
+            ],
+          ),
+          Column(
+            children: <Widget>[
+              Align(alignment: Alignment.centerRight,child:Text("Total Days: " + _totalDays.toString())),
+              Align(alignment: Alignment.centerRight,child:Text('Daily Charge: ' + _totalDaily.toString())),
+              Align(alignment: Alignment.centerRight,child:Text('Extra Charge: ' + _totalExtra.toString())),
+              Align(alignment: Alignment.centerRight,child:Text('Grand Total: ' + (_totalDaily+_totalExtra).toString()))
             ],
           )
         ],
       ),
-    )
+    );
+    final loadingScreen = Container(
+      alignment: Alignment.center,
+      child: CircularProgressIndicator(),
+    );
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -123,7 +171,7 @@ class _DashboardState extends State<Dashboard> {
             style: GoogleFonts.abel(
                 textStyle: TextStyle(fontWeight: FontWeight.bold))),
       ),
-      body: extraList,
+      body: _isLoading?loadingScreen:extraList,
     );
   }
 }
