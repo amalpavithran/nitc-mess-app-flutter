@@ -30,129 +30,166 @@ class User {
   String rollNumber;
   String mess;
 
-  User({
-    this.name,
-    this.email,
-    this.rollNumber,
-    this.mess
-  });
+  User({this.name, this.email, this.rollNumber, this.mess});
 }
 
 class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     final _url = "https://nitc-mess.herokuapp.com";
-    final _storage = new FlutterSecureStorage();
+    final _storage = FlutterSecureStorage();
     int _totalExtra = 0;
     int _totalDaily = 0;
     int _totalDays = 0;
-    bool _isLoading = true;
     String _token;
-    User _user;
 
-    Future<void> _getToken() async{
-      _token = await _storage.read(key: 'token');
+    _getToken() async {
+      final key  = await _storage.read(key: 'token');
+      if(key == null){
+        Navigator.pushReplacementNamed(context, '/login');
+      }else{
+        _token = key;
+      }
     }
-    Future<void> _getUser() async{
-      http.get(_url+'/api/users/me',headers: {HttpHeaders.authorizationHeader: 'Bearer ' + _token}).
-      then((response){
-        if(response.statusCode==200){
-          final jsonResponse = json.decode(response.body);
-            _user = User(
+
+    Future<User> _getUser() async {
+      await _getToken();
+      final result = await http.get(_url + '/api/users/me/',
+          headers: {HttpHeaders.authorizationHeader: "Bearer" + _token});
+      if (result.statusCode == 200) {
+        print(result.statusCode);
+        final jsonResponse = json.decode(result.body);
+        return User(
             name: jsonResponse['name'],
             email: jsonResponse['email'],
             rollNumber: jsonResponse['rollNumber'],
-            mess: jsonResponse['mess']
-          );
-        } 
-      });
+            mess: jsonResponse['mess']);
+      } else {
+        print(result);
+        return User(email: "NA",name: "NA",rollNumber: "NA",mess: "NA");
+      }
     }
 
     Future<List<Extra>> getExtras() async {
       List<Extra> extras = [];
       await _getToken();
-      if(_token==null){
-        Navigator.pushReplacementNamed(context, '/login');
-      }
-      http.Response response = await http.get(_url + "/api/users/dues/",headers: {HttpHeaders.authorizationHeader: "Bearer " + _token});
-      if (response.statusCode == 200) {
-        var responsejson = jsonDecode(response.body);
-        for (var item in responsejson) {
-          if(item['message']=='DailyCharge'){
-            _totalDays += 1;
-            _totalDaily += item['amount'];
-          }else{
-            var extra = Extra(
-              rollNumber: item['rollNumber'],
-              message: item['message'],
-              amount: item['amount'],
-              date: item['date']
-            );
-            _totalExtra += item['amount'];
-            extras.add(extra);
+      http.Response response;
+      try {
+        if (_token != null) {
+          response = await http.get(_url + "/api/users/dues/",
+              headers: {HttpHeaders.authorizationHeader: "Bearer " + _token});
+          print(response);
+          if (response.statusCode == 200) {
+            var responsejson = jsonDecode(response.body);
+            for (var item in responsejson) {
+              if (item['message'] == 'DailyCharge') {
+                _totalDays += 1;
+                _totalDaily += item['amount'];
+              } else {
+                var extra = Extra(
+                    rollNumber: item['rollNumber'],
+                    message: item['message'],
+                    amount: item['amount'],
+                    date: item['date']);
+                _totalExtra += item['amount'];
+                extras.add(extra);
+              }
+            }
+            return extras;
+          } else {
+            extras.add(Extra());
+            return extras;
           }
+        } else {
+          Navigator.pushReplacementNamed(context, '/login');
         }
-        return extras;
-      }else{
-        return [];
+      } catch (error) {
+        print(error);
       }
     }
 
     final extraList = FutureBuilder(
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.none &&
-            snapshot.hasData == null) {
-          return Container();
-        }else{
-        return ListView.builder(
-          itemCount: snapshot.data.length,
-          itemBuilder: (context, index) {
-            Extra extra = snapshot.data[index];
-            return ListTile(
-              leading: Icon(Icons.attach_money),
-              title: Text(extra.message),
-              contentPadding: EdgeInsets.all(5),
-              
-              trailing: Text(extra.amount.toString()),
-            );
-          },
-        );}
+        if (snapshot.data != null &&
+            snapshot.connectionState == ConnectionState.done) {
+          return ListView.builder(
+            itemCount: snapshot.data.length,
+            itemBuilder: (context, index) {
+              Extra extra = snapshot.data[index];
+              return Column(
+                children: <Widget>[
+                  ListTile(
+                    leading: Icon(Icons.attach_money),
+                    title: Text(extra.message),
+                    contentPadding: EdgeInsets.all(5),
+                    trailing: Text(extra.amount.toString()),
+                  ),
+                  Divider()
+                ],
+              );
+            },
+          );
+        } else {
+          return Align(
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(),
+          );
+        }
       },
       future: getExtras(),
     );
 
     final self = Card(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Align(child: Icon(Icons.person),alignment: Alignment.centerLeft),
-          Column(
-            children: <Widget>[
-              Text(
-                _user.name,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+      child: FutureBuilder<User>(
+        builder: (context, snapshot) {
+          if (snapshot.data != null &&
+              snapshot.connectionState == ConnectionState.done) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                    child: Icon(Icons.person),padding: EdgeInsets.all(5),),
+                Column(
+                  children: <Widget>[
+                    Text(
+                      snapshot.data.name,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(snapshot.data.rollNumber),
+                    Text(snapshot.data.mess),
+                  ],
                 ),
-              ),
-              Text(_user.rollNumber),
-              Text(_user.mess),
-            ],
-          ),
-          Column(
-            children: <Widget>[
-              Align(alignment: Alignment.centerRight,child:Text("Total Days: " + _totalDays.toString())),
-              Align(alignment: Alignment.centerRight,child:Text('Daily Charge: ' + _totalDaily.toString())),
-              Align(alignment: Alignment.centerRight,child:Text('Extra Charge: ' + _totalExtra.toString())),
-              Align(alignment: Alignment.centerRight,child:Text('Grand Total: ' + (_totalDaily+_totalExtra).toString()))
-            ],
-          )
-        ],
+                Column(
+                  children: <Widget>[
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: Text("Total Days: " + _totalDays.toString())),
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: Text('Daily Charge: ' + _totalDaily.toString())),
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: Text('Extra Charge: ' + _totalExtra.toString())),
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: Text('Grand Total: ' +
+                            (_totalDaily + _totalExtra).toString()))
+                  ],
+                )
+              ],
+            );
+          } else {
+            return Align(
+              alignment: Alignment.center,
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+        future: _getUser(),
       ),
-    );
-    final loadingScreen = Container(
-      alignment: Alignment.center,
-      child: CircularProgressIndicator(),
     );
     return Scaffold(
       appBar: AppBar(
@@ -160,18 +197,28 @@ class _DashboardState extends State<Dashboard> {
         centerTitle: true,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.exit_to_app,
-            color: Colors.black),
-            onPressed: () async{
-              await _storage.delete(key: 'token');
-              Navigator.pushReplacementNamed(context, '/login');
-            })
+              icon: Icon(Icons.exit_to_app, color: Colors.black),
+              onPressed: () async {
+                await _storage.delete(key: 'token');
+                Navigator.pushReplacementNamed(context, '/login');
+              })
         ],
         title: Text("NITC MESS",
             style: GoogleFonts.abel(
                 textStyle: TextStyle(fontWeight: FontWeight.bold))),
       ),
-      body: _isLoading?loadingScreen:extraList,
+      body: Column(
+        children: <Widget>[self, Expanded(child: extraList)],
+      ),
+      floatingActionButton: IconButton(
+        icon: Icon(Icons.refresh), 
+        onPressed: (){
+          setState(() {
+            _getToken();
+            getExtras();
+            _getUser();
+          });
+        }),
     );
   }
 }
