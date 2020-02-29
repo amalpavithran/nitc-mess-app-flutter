@@ -134,7 +134,7 @@ class _LoginState extends State<Login> {
                               var jsonResponse  = convert.jsonDecode(response.body);
                               storage.write(key: 'token', value: jsonResponse['token']);
                               print(jsonResponse);
-                              Navigator.pushReplacementNamed(context, '/login');
+                              Navigator.pushReplacementNamed(context, '/dashboard');
                             }            
                           }
                           print(this._isLoading);
