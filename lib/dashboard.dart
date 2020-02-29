@@ -55,28 +55,26 @@ class _DashboardState extends State<Dashboard> {
       }
     }
 
-    final extraList = () {
-      return FutureBuilder(
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.none &&
-              snapshot.hasData == null) {
-            return Container();
-          }
-          return ListView.builder(
-            itemCount: snapshot.data.length,
-            itemBuilder: (context, index) {
-              Extra extra = snapshot.data[index];
-              return ListTile(
-                leading: Icon(Icons.attach_money),
-                title: Text(extra.message),
-                trailing: Text(extra.amount.toString()),
-              );
-            },
-          );
-        },
-        future: getExtras(),
-      );
-    }
+    final extraList = FutureBuilder(
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.none &&
+            snapshot.hasData == null) {
+          return Container();
+        }
+        return ListView.builder(
+          itemCount: snapshot.data.length,
+          itemBuilder: (context, index) {
+            Extra extra = snapshot.data[index];
+            return ListTile(
+              leading: Icon(Icons.attach_money),
+              title: Text(extra.message),
+              trailing: Text(extra.amount.toString()),
+            );
+          },
+        );
+      },
+      future: getExtras(),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -86,7 +84,7 @@ class _DashboardState extends State<Dashboard> {
             style: GoogleFonts.abel(
                 textStyle: TextStyle(fontWeight: FontWeight.bold))),
       ),
-      body: ExtraList(),
+      body: extraList,
     );
   }
 }

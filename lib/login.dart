@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -118,17 +120,22 @@ class _LoginState extends State<Login> {
                             print(_password);
                             http.Response response = await http.post(
                               url+'/api/auth/signin',
-                              body: {
+                              headers: {HttpHeaders.contentTypeHeader:'application/json'},
+                              body: convert.json.encode({
                                 'email':_email,
                                 'password':_password
-                              }
+                              })
                             );
+                            print(_email);
+                            print(_password);
+                            print(response.statusCode);
                             print(response.body);
                             if(response.statusCode == 200){
                               var jsonResponse  = convert.jsonDecode(response.body);
                               storage.write(key: 'token', value: jsonResponse['token']);
                               print(jsonResponse);
-                            }                            
+                            }               
+                            Navigator.pushReplacementNamed(context, '/dashboard');            
                           }
                           print(this._isLoading);
                           
