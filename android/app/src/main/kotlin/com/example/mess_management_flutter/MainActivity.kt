@@ -1,4 +1,4 @@
-package com.example.mess_management_flutter
+package com.teamhac.nitcmess
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

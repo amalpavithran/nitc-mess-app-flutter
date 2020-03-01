@@ -75,26 +75,6 @@ class _DashboardState extends State<Dashboard> {
       }
     }
 
-    Future<User> _getUser() async {
-      await _getToken();
-      final result = await http.get(_url + '/api/users/me/',
-          headers: {HttpHeaders.contentTypeHeader:'application/json',HttpHeaders.authorizationHeader: "Bearer " + _token});
-      if (result.statusCode == 200) {
-        final jsonResponse = json.decode(result.body)['user'];
-        print(jsonResponse);
-        final user =  User(
-            name: jsonResponse['name'],
-            email: jsonResponse['email'],
-            rollNumber: jsonResponse['rollNumber'],
-            mess: jsonResponse['mess']);
-        return user;
-      }else if(result.statusCode == 401){
-        Navigator.pushReplacementNamed(context, '/login');
-        return User();
-      } 
-      return User();
-    }
-
     Future<List<Extra>> _getExtras() async {
       List<Extra> extras = [];
       Totals totals = new Totals();
@@ -123,7 +103,7 @@ class _DashboardState extends State<Dashboard> {
               }
             }
             totals.isReady=true;
-            _totals=totals;
+            _totals = totals;
             return extras;
           } else {
             extras.add(Extra());
@@ -170,6 +150,28 @@ class _DashboardState extends State<Dashboard> {
       },
       future: _getExtras(),
     );
+
+    Future<User> _getUser() async {
+      await _getToken(); 
+      await _getExtras();
+      final result = await http.get(_url + '/api/users/me/',
+          headers: {HttpHeaders.contentTypeHeader:'application/json',HttpHeaders.authorizationHeader: "Bearer " + _token});
+      if (result.statusCode == 200) {
+        final jsonResponse = json.decode(result.body)['user'];
+        print(jsonResponse);
+        final user =  User(
+            name: jsonResponse['name'],
+            email: jsonResponse['email'],
+            rollNumber: jsonResponse['rollNumber'],
+            mess: jsonResponse['mess']);
+        
+        return user;
+      }else if(result.statusCode == 401){
+        Navigator.pushReplacementNamed(context, '/login');
+        return User();
+      } 
+      return User();
+    }
 
     final self = Card(
       margin: EdgeInsets.all(8),
