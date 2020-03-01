@@ -153,7 +153,7 @@ class _DashboardState extends State<Dashboard> {
                     leading: Icon(Icons.attach_money),
                     title: Text(extra.message),
                     subtitle: _getDate(extra.date),
-                    contentPadding: EdgeInsets.symmetric(vertical: 5,horizontal: 15.0),
+                    contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 15.0),
                     trailing: Text(extra.amount.toString()),
                   ),
                   Divider()
@@ -242,8 +242,9 @@ class _DashboardState extends State<Dashboard> {
       body: Column(
         children: <Widget>[self, Expanded(child: extraList)],
       ),
-      floatingActionButton: IconButton(
-        icon: Icon(Icons.refresh), 
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black,
+        child: Icon(Icons.refresh,color: Colors.white), 
         onPressed: (){
           setState(() {
           });
