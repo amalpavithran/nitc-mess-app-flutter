@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:recase/recase.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -47,6 +48,23 @@ class _DashboardState extends State<Dashboard> {
     final _storage = FlutterSecureStorage();
     Totals _totals = Totals();
     String _token;
+
+    //Secondary Styled Text
+    Widget secText(String text){
+      return Text(
+        text,
+        style: GoogleFonts.oxygen(
+          color: Colors.black45
+        ),
+      );
+    }
+
+    Widget _getDate(int date){
+      final dateTime = DateTime.fromMillisecondsSinceEpoch(date * 1000);
+      return Text(
+        dateTime.day.toString() + "/" + dateTime.month.toString() + '/' + dateTime.year.toString()
+      );
+    }
 
     _getToken() async {
       final key  = await _storage.read(key: 'token');
@@ -119,21 +137,23 @@ class _DashboardState extends State<Dashboard> {
       }
       return null;
     }
-
     final extraList = FutureBuilder(
       builder: (context, snapshot) {
         if (snapshot.data != null &&
             snapshot.connectionState == ConnectionState.done) {
+              final extraList = snapshot.data.reversed.toList();
           return ListView.builder(
-            itemCount: snapshot.data.length,
+            itemCount: extraList.length,
             itemBuilder: (context, index) {
-              Extra extra = snapshot.data[index];
+              Extra extra = extraList[index];
               return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   ListTile(
                     leading: Icon(Icons.attach_money),
                     title: Text(extra.message),
-                    contentPadding: EdgeInsets.all(5),
+                    subtitle: _getDate(extra.date),
+                    contentPadding: EdgeInsets.symmetric(vertical: 5,horizontal: 15.0),
                     trailing: Text(extra.amount.toString()),
                   ),
                   Divider()
@@ -169,14 +189,11 @@ class _DashboardState extends State<Dashboard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          snapshot.data.name.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          snapshot.data.name.titleCase,
+                          style: GoogleFonts.tradeWinds()
                         ),
-                        Text(snapshot.data.rollNumber),
-                        Text("Mess: " + snapshot.data.mess),
+                        secText(snapshot.data.rollNumber),
+                        secText("Mess: " + snapshot.data.mess),
                       ],
                     ),
                   ),
@@ -185,10 +202,10 @@ class _DashboardState extends State<Dashboard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
-                        Text("Total Days: " + _totals.totalDays.toString()),
-                        Text('Daily Charge: ' + _totals.totalDaily.toString()),
-                        Text('Extra Charge: ' + _totals.totalExtra.toString()),
-                        Text('Grand Total: ' +
+                        secText("Total Days: " + _totals.totalDays.toString()),
+                        secText('Daily Charge: ' + _totals.totalDaily.toString()),
+                        secText('Extra Charge: ' + _totals.totalExtra.toString()),
+                        secText('Grand Total: ' +
                             (_totals.totalDaily + _totals.totalExtra).toString())
                       ],
                     ),

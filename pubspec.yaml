@@ -28,6 +28,7 @@ dependencies:
   google_fonts: ^0.3.9
   validators: ^2.0.0
   flutter_secure_storage: ^3.3.1+1
+  recase: ^3.0.0
   
 dev_dependencies:
   flutter_test:
