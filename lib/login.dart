@@ -144,7 +144,7 @@ class _LoginState extends State<Login> {
                     )
                   ),
                   Container(
-                    child: (this._isLoading)?CircularProgressIndicator():Container(),
+                    child: (this._isLoading)?Container(alignment: Alignment.center,child:CircularProgressIndicator()):Container(),
                   )
               ],
             ),
