@@ -24,66 +24,83 @@ class Extra {
     this.date,
   });
 }
-class Totals{
+
+class Totals {
   int totalDaily;
   int totalDays;
   int totalExtra;
   bool isReady;
 
-  Totals({this.totalDaily=0,this.totalDays=0,this.totalExtra=0,this.isReady=false});
+  Totals(
+      {this.totalDaily = 0,
+      this.totalDays = 0,
+      this.totalExtra = 0,
+      this.isReady = false});
 }
+
 class User {
   String name;
   String email;
   String rollNumber;
   String mess;
 
-  User({this.name="NA", this.email="NA", this.rollNumber="NA", this.mess="NA"});
+  User(
+      {this.name = "NA",
+      this.email = "NA",
+      this.rollNumber = "NA",
+      this.mess = "NA"});
 }
 
 class _DashboardState extends State<Dashboard> {
+  final _url = "https://nitc-mess.herokuapp.com";
+  final _storage = FlutterSecureStorage();
+  Totals _totals = Totals();
+  User _user = User();
+  String _token;
+  List<Extra> _extras;
+
   @override
   Widget build(BuildContext context) {
-    final _url = "https://nitc-mess.herokuapp.com";
-    final _storage = FlutterSecureStorage();
-    Totals _totals = Totals();
-    String _token;
-
     //Secondary Styled Text
-    Widget secText(String text){
+    Widget secText(String text) {
       return Text(
         text,
-        style: GoogleFonts.oxygen(
-          color: Colors.black45
-        ),
+        style: GoogleFonts.oxygen(color: Colors.black45),
       );
     }
 
-    Widget _getDate(int date){
+    Widget _getDate(int date) {
       final dateTime = DateTime.fromMillisecondsSinceEpoch(date * 1000);
-      return Text(
-        dateTime.day.toString() + "/" + dateTime.month.toString() + '/' + dateTime.year.toString()
-      );
+      return Text(dateTime.day.toString() +
+          "/" +
+          dateTime.month.toString() +
+          '/' +
+          dateTime.year.toString());
     }
 
     _getToken() async {
-      final key  = await _storage.read(key: 'token');
-      if(key == null){
+      final key = await _storage.read(key: 'token');
+      if (key == null) {
         Navigator.pushReplacementNamed(context, '/login');
-      }else{
+      } else {
         _token = key;
       }
     }
 
     Future<List<Extra>> _getExtras() async {
+      if(_totals.isReady){
+        return _extras;
+      }
       List<Extra> extras = [];
       Totals totals = new Totals();
       await _getToken();
       http.Response response;
       try {
         if (_token != null) {
-          response = await http.get(_url + "/api/users/dues/",
-              headers: {HttpHeaders.contentTypeHeader:'application/json',HttpHeaders.authorizationHeader: "Bearer " + _token});
+          response = await http.get(_url + "/api/users/dues/", headers: {
+            HttpHeaders.contentTypeHeader: 'application/json',
+            HttpHeaders.authorizationHeader: "Bearer " + _token
+          });
           print(response.statusCode);
           print(response.body);
           if (response.statusCode == 200) {
@@ -102,8 +119,14 @@ class _DashboardState extends State<Dashboard> {
                 extras.add(extra);
               }
             }
-            totals.isReady=true;
+            _extras = extras;
+            totals.isReady = _totals.isReady;
             _totals = totals;
+            if (_totals.isReady == false) {
+              setState(() {
+                _totals.isReady = true;
+              });
+            }
             return extras;
           } else {
             extras.add(Extra());
@@ -117,11 +140,12 @@ class _DashboardState extends State<Dashboard> {
       }
       return null;
     }
+
     final extraList = FutureBuilder(
       builder: (context, snapshot) {
         if (snapshot.data != null &&
             snapshot.connectionState == ConnectionState.done) {
-              final extraList = snapshot.data.reversed.toList();
+          final extraList = snapshot.data.reversed.toList();
           return ListView.builder(
             itemCount: extraList.length,
             itemBuilder: (context, index) {
@@ -133,7 +157,8 @@ class _DashboardState extends State<Dashboard> {
                     leading: Icon(Icons.attach_money),
                     title: Text(extra.message),
                     subtitle: _getDate(extra.date),
-                    contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 15.0),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 0, horizontal: 15.0),
                     trailing: Text(extra.amount.toString()),
                   ),
                   Divider()
@@ -152,24 +177,30 @@ class _DashboardState extends State<Dashboard> {
     );
 
     Future<User> _getUser() async {
-      await _getToken(); 
-      await _getExtras();
-      final result = await http.get(_url + '/api/users/me/',
-          headers: {HttpHeaders.contentTypeHeader:'application/json',HttpHeaders.authorizationHeader: "Bearer " + _token});
+      if(_totals.isReady){
+        return _user;
+      }
+      await _getToken();
+      // await _getExtras();
+      final result = await http.get(_url + '/api/users/me/', headers: {
+        HttpHeaders.contentTypeHeader: 'application/json',
+        HttpHeaders.authorizationHeader: "Bearer " + _token
+      });
       if (result.statusCode == 200) {
         final jsonResponse = json.decode(result.body)['user'];
         print(jsonResponse);
-        final user =  User(
+
+        final user = User(
             name: jsonResponse['name'],
             email: jsonResponse['email'],
             rollNumber: jsonResponse['rollNumber'],
             mess: jsonResponse['mess']);
-        
+        _user = user;
         return user;
-      }else if(result.statusCode == 401){
+      } else if (result.statusCode == 401) {
         Navigator.pushReplacementNamed(context, '/login');
         return User();
-      } 
+      }
       return User();
     }
 
@@ -184,16 +215,19 @@ class _DashboardState extends State<Dashboard> {
               return Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  Expanded(flex:1,child: Padding(padding: EdgeInsets.all(10),child: Icon(Icons.person),)),
+                  Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Icon(Icons.person),
+                      )),
                   Expanded(
                     flex: 2,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(
-                          snapshot.data.name.titleCase,
-                          style: GoogleFonts.tradeWinds()
-                        ),
+                        Text(snapshot.data.name.titleCase,
+                            style: GoogleFonts.tradeWinds()),
                         secText(snapshot.data.rollNumber),
                         secText("Mess: " + snapshot.data.mess),
                       ],
@@ -205,10 +239,13 @@ class _DashboardState extends State<Dashboard> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
                         secText("Total Days: " + _totals.totalDays.toString()),
-                        secText('Daily Charge: ' + _totals.totalDaily.toString()),
-                        secText('Extra Charge: ' + _totals.totalExtra.toString()),
+                        secText(
+                            'Daily Charge: ' + _totals.totalDaily.toString()),
+                        secText(
+                            'Extra Charge: ' + _totals.totalExtra.toString()),
                         secText('Grand Total: ' +
-                            (_totals.totalDaily + _totals.totalExtra).toString())
+                            (_totals.totalDaily + _totals.totalExtra)
+                                .toString())
                       ],
                     ),
                   )
@@ -245,12 +282,13 @@ class _DashboardState extends State<Dashboard> {
         children: <Widget>[self, Expanded(child: extraList)],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black,
-        child: Icon(Icons.refresh,color: Colors.white), 
-        onPressed: (){
-          setState(() {
-          });
-        }),
+          backgroundColor: Colors.black,
+          child: Icon(Icons.refresh, color: Colors.white),
+          onPressed: () {
+            setState(() {
+              _totals.isReady=false;
+            });
+          }),
     );
   }
 }
