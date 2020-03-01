@@ -27,8 +27,9 @@ class Totals{
   int totalDaily;
   int totalDays;
   int totalExtra;
+  bool isReady;
 
-  Totals({this.totalDaily=0,this.totalDays=0,this.totalExtra=0});
+  Totals({this.totalDaily=0,this.totalDays=0,this.totalExtra=0,this.isReady=false});
 }
 class User {
   String name;
@@ -103,6 +104,7 @@ class _DashboardState extends State<Dashboard> {
                 extras.add(extra);
               }
             }
+            totals.isReady=true;
             _totals=totals;
             return extras;
           } else {
@@ -160,8 +162,9 @@ class _DashboardState extends State<Dashboard> {
               return Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  Container(alignment: Alignment.centerLeft,child: Padding(padding: EdgeInsets.all(10),child: Icon(Icons.person),)),
+                  Expanded(flex:1,child: Padding(padding: EdgeInsets.all(10),child: Icon(Icons.person),)),
                   Expanded(
+                    flex: 2,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -178,6 +181,7 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ),
                   Expanded(
+                    flex: 2,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
