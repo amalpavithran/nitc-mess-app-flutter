@@ -60,7 +60,7 @@ class _DashboardState extends State<Dashboard> {
     }
 
     Widget _getDate(int date){
-      final dateTime = DateTime.fromMillisecondsSinceEpoch(date * 1000);
+      final dateTime = DateTime.fromMillisecondsSinceEpoch(date);
       return Text(
         dateTime.day.toString() + "/" + dateTime.month.toString() + '/' + dateTime.year.toString()
       );
