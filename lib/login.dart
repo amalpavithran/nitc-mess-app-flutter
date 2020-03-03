@@ -14,7 +14,7 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final storage = new FlutterSecureStorage();
-  String _email, _password, _error;
+  String _email, _password,_error;
   bool _isLoading = false;
   final url = "https://nitc-mess.herokuapp.com";
   final GlobalKey<FormState> _loginkey = GlobalKey<FormState>();
@@ -111,11 +111,11 @@ class _LoginState extends State<Login> {
           ),
         ));
     
-    final errormsg = Container(
+    Widget errormsg(){ return Container(
       padding: EdgeInsets.all(5),
       alignment: Alignment.center,
       child: (Text(
-        "ERROR: " + _error,
+        _error,
         style: GoogleFonts.robotoMono(
           fontSize: 15,
           textStyle: TextStyle(
@@ -124,14 +124,18 @@ class _LoginState extends State<Login> {
         )
       )),
     );
+    }
     Widget _submit() {
       if (_isLoading) {
-        return CircularProgressIndicator();
-      } else if (_error != null) {
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CircularProgressIndicator(),
+        );
+      } else if (_error!=null) {
         return Column(
           children: <Widget>[
             signinbtn,
-            errormsg
+            errormsg()
           ],
         );
       } else {
