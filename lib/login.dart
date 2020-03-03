@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mess_management_flutter/sharedcode.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:validators/validators.dart';
@@ -15,30 +14,13 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final storage = new FlutterSecureStorage();
-  String _email, _password,_error;
+  String _email, _password, _error;
   bool _isLoading = false;
   final url = "https://nitc-mess.herokuapp.com";
   final GlobalKey<FormState> _loginkey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final progress =  (){
-      if (_isLoading) {
-        print("Progress");
-        return SizedBox(height: 10, child: CircularProgressIndicator());
-      } else if (_error != null) {
-        print("Error");
-        return Container(
-          alignment: Alignment.center,
-          child: (Text(
-            _error,
-            style: TextStyle(color: Colors.red),
-          )),
-        );
-      } else {
-        return Container();
-      }
-    };
     final email = Padding(
       padding: const EdgeInsets.symmetric(vertical: 7.0, horizontal: 10.0),
       child: TextFormField(
@@ -105,6 +87,57 @@ class _LoginState extends State<Login> {
       }
     }
 
+    final signinbtn = Padding(
+        padding: EdgeInsets.symmetric(vertical: 7.0, horizontal: 10.0),
+        child: SizedBox(
+          height: 55,
+          child: RaisedButton(
+            color: Colors.blue,
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+            child: Center(
+                child: Text(
+              "Login",
+              style: TextStyle(color: Colors.white),
+            )),
+            onPressed: () async {
+              setState(() {
+                _isLoading = true;
+              });
+              await _login();
+              setState(() {
+                _isLoading = false;
+              });
+            },
+          ),
+        ));
+    
+    final errormsg = Container(
+      padding: EdgeInsets.all(5),
+      alignment: Alignment.center,
+      child: (Text(
+        "ERROR: " + _error,
+        style: GoogleFonts.robotoMono(
+          fontSize: 15,
+          textStyle: TextStyle(
+            color: Colors.red
+          )
+        )
+      )),
+    );
+    Widget _submit() {
+      if (_isLoading) {
+        return CircularProgressIndicator();
+      } else if (_error != null) {
+        return Column(
+          children: <Widget>[
+            signinbtn,
+            errormsg
+          ],
+        );
+      } else {
+        return signinbtn;
+      }
+    }
     Widget login() => Form(
           key: _loginkey,
           child: Column(
@@ -126,36 +159,12 @@ class _LoginState extends State<Login> {
               ),
               email,
               password,
-              Padding(
-                  padding:
-                      EdgeInsets.symmetric(vertical: 7.0, horizontal: 10.0),
-                  child: SizedBox(
-                    height: 55,
-                    child: RaisedButton(
-                      color: Colors.blue,
-                      materialTapTargetSize: MaterialTapTargetSize.padded,
-                      child: Center(
-                          child: Text(
-                        "Login",
-                        style: TextStyle(color: Colors.white),
-                      )),
-                      onPressed: () async {
-                        setState(() {
-                          _isLoading = true;
-                        });
-                        await _login();
-                        setState(() {
-                          _isLoading = false;
-                        });
-                      },
-                    ),
-                  )),
+              _submit(),
             ],
           ),
         );
 
-    return PreventAppExit(
-        child: Scaffold(
+    return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
@@ -166,9 +175,9 @@ class _LoginState extends State<Login> {
       body: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.max,
-          children: <Widget>[login(), progress()],
+          children: <Widget>[login()],
         ),
       ),
-    ));
+    );
   }
 }
