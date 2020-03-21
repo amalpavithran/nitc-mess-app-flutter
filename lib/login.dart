@@ -5,7 +5,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
-import 'package:validators/validators.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -14,31 +13,31 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final storage = new FlutterSecureStorage();
-  String _email, _password,_error;
+  String _rollNumber,_error;
+  String  _password;
   bool _isLoading = false;
   final url = "https://nitc-mess.herokuapp.com";
   final GlobalKey<FormState> _loginkey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final email = Padding(
+    final rollNumber = Padding(
       padding: const EdgeInsets.symmetric(vertical: 7.0, horizontal: 10.0),
       child: TextFormField(
         validator: (value) {
-          if (isEmail(value)) {
+          if (value.length!=7) {
             return null;
           } else {
-            return "Enter a valid Email";
+            return "Enter a valid roll number";
           }
         },
         onSaved: (String value) {
-          this._email = value;
+          this._rollNumber = value;
         },
-        keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(
             enabledBorder:
                 OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-            labelText: "Email",
+            labelText: "Roll Number",
             border: OutlineInputBorder()),
       ),
     );
@@ -61,14 +60,10 @@ class _LoginState extends State<Login> {
     _login() async {
       if (_loginkey.currentState.validate()) {
         _loginkey.currentState.save();
-        print(_email);
-        print(_password);
-        http.Response response = await http.post(url + '/api/auth/signin',
+        http.Response response = await http.post(url + '/api/auth/student/signin',
             headers: {HttpHeaders.contentTypeHeader: 'application/json'},
             body:
-                convert.json.encode({'email': _email, 'password': _password}));
-        print(_email);
-        print(_password);
+                convert.json.encode({'rollNumber': _rollNumber.toUpperCase(), 'password': _rollNumber.toUpperCase()}));
         print(response.statusCode);
         print(response.body);
         if (response.statusCode == 200) {
@@ -161,7 +156,7 @@ class _LoginState extends State<Login> {
                   ],
                 ),
               ),
-              email,
+              rollNumber,
               password,
               _submit(),
             ],
