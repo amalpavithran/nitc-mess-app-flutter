@@ -11,7 +11,7 @@ description: A mess management client for students
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 2.0.5+1
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -29,10 +29,16 @@ dependencies:
   validators: ^2.0.0
   flutter_secure_storage: ^3.3.1+1
   recase: ^3.0.0
+  equatable: ^1.2.0
+  get_it: ^4.0.2
+  flutter_bloc: ^4.0.1
+  dartz: ^0.9.1
+  data_connection_checker: ^0.3.4
   
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  mockito: ^4.1.1
 
 
 # For information on the generic Dart part of this file, see the
