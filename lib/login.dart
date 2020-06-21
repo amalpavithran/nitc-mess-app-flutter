@@ -24,6 +24,7 @@ class _LoginState extends State<Login> {
     final rollNumber = Padding(
       padding: const EdgeInsets.symmetric(vertical: 7.0, horizontal: 10.0),
       child: TextFormField(
+        textCapitalization: TextCapitalization.characters,
         validator: (value) {
           if (value.length!=7) {
             return null;
@@ -44,6 +45,7 @@ class _LoginState extends State<Login> {
     final password = Padding(
       padding: EdgeInsets.symmetric(vertical: 7.0, horizontal: 10.0),
       child: TextFormField(
+        enabled: false,
         onSaved: (value) {
           this._password = value;
         },
@@ -51,10 +53,11 @@ class _LoginState extends State<Login> {
         keyboardType: TextInputType.visiblePassword,
         decoration: InputDecoration(
             enabledBorder:
-                OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+                OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
             labelText: "Password",
+            labelStyle: TextStyle(color:Colors.grey),
             border: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.black))),
+                borderSide: BorderSide(color: Colors.grey))),
       ),
     );
     _login() async {
