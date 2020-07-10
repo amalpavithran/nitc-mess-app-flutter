@@ -18,15 +18,24 @@ void main() {
     mockHttpClient = MockHttpClient();
     authRemoteDataSourceImpl = AuthRemoteDataSourceImpl(client: mockHttpClient);
   });
+  setupMockHttpClientSuccess200() {
+    when(mockHttpClient.post(any,
+            headers: anyNamed('headers'), body: anyNamed('body')))
+        .thenAnswer((realInvocation) async => http.Response('success', 200));
+  }
 
   setupMockHttpClientServerError500() {
-    when(mockHttpClient.post(any, headers: anyNamed('headers'))).thenAnswer(
-        (realInvocation) async => http.Response('Something went wrong', 500));
+    when(mockHttpClient.post(any,
+            headers: anyNamed('headers'), body: anyNamed('body')))
+        .thenAnswer((realInvocation) async =>
+            http.Response('Something went wrong', 500));
   }
 
   setupMockHttpClientUnauthorized401() {
-    when(mockHttpClient.post(any, headers: anyNamed('headers'))).thenAnswer(
-        (realInvocation) async => http.Response("Invalid Credentials", 401));
+    when(mockHttpClient.post(any,
+            headers: anyNamed('headers'), body: anyNamed('body')))
+        .thenAnswer((realInvocation) async =>
+            http.Response("Invalid Credentials", 401));
   }
 
   group('login', () {
@@ -47,7 +56,7 @@ void main() {
       //act
       authRemoteDataSourceImpl.login(tUsername, tPassword);
       //assert
-      verify(mockHttpClient.post('http://$BASEURL/api/auth/login', headers: {
+      verify(mockHttpClient.post('$BASEURL/api/auth/login', headers: {
         'Content-Type': 'application/json',
       }, body: {
         'username': tUsername,
@@ -66,10 +75,7 @@ void main() {
     test('should throw [InvalidCredentialsException] on status code 401',
         () async {
       //arrange
-      when(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenAnswer((realInvocation) async =>
-              http.Response("Invalid username or password", 401));
+      setupMockHttpClientUnauthorized401();
       //act
       final call = authRemoteDataSourceImpl.login;
       //assert
@@ -78,10 +84,7 @@ void main() {
     });
     test('should return [ServerException] on all other errors', () async {
       //arrange
-      when(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenAnswer((realInvocation) async =>
-              http.Response("Invalid username or password", 500));
+      setupMockHttpClientServerError500();
       //act
       final call = authRemoteDataSourceImpl.login;
       //assert
@@ -94,39 +97,116 @@ void main() {
     test('should POST to api/auth/change with header application/json',
         () async {
       //arrange
-      when(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenAnswer((realInvocation) async => http.Response('success', 200));
+      setupMockHttpClientSuccess200();
       //act
       await authRemoteDataSourceImpl.changePassword(tOldPassword, tNewPassword);
       //assert
-      verify(mockHttpClient.post('http://$BASEURL/api/auth/change', headers: {
+      verify(mockHttpClient.post('$BASEURL/api/auth/change', headers: {
         'Content-Type': 'application/json',
       }, body: {
         'oldPassword': tOldPassword,
         'newPassword': tNewPassword,
       }));
     });
-    test('should return void on success',
-        () async {
+    test('should return void on success', () async {
       //arrange
-      when(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenAnswer((realInvocation) async => http.Response('success', 200));
-      //act
-      final call =  authRemoteDataSourceImpl.changePassword;
-      //assert
-      expect(()=>call(tOldPassword, tNewPassword),returnsNormally);
-    });
-    test('should throw ServerException on other status codes', () async {
-      //arrange
-      when(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenAnswer((realInvocation) async => http.Response('ERROR', 500));
+      setupMockHttpClientSuccess200();
       //act
       final call = authRemoteDataSourceImpl.changePassword;
       //assert
-      expect(()=>call(tOldPassword, tNewPassword), throwsA(isA<ServerException>()));
+      expect(() => call(tOldPassword, tNewPassword), returnsNormally);
+    });
+    test('should throw ServerException on other status codes', () async {
+      //arrange
+      setupMockHttpClientServerError500();
+      //act
+      final call = authRemoteDataSourceImpl.changePassword;
+      //assert
+      expect(() => call(tOldPassword, tNewPassword),
+          throwsA(isA<ServerException>()));
+    });
+  });
+  group('forgotPassword', () {
+    final tEmail = 'amalpaviithranmp@gmail.com';
+    test('should POST to api/auth/forgot with headers application/json',
+        () async {
+      //arrange
+      setupMockHttpClientSuccess200();
+      //act
+      await authRemoteDataSourceImpl.forgotPassword(tEmail);
+      //assert
+      verify(mockHttpClient.post('$BASEURL/api/auth/forgot',
+          headers: {'Content-Type': 'application/json'},
+          body: {'email': tEmail}));
+    });
+    test('should return void on success', () async {
+      //arrange
+      setupMockHttpClientSuccess200();
+      //act
+      final call = authRemoteDataSourceImpl.forgotPassword;
+      //assert
+      expect(() => call(tEmail), returnsNormally);
+    });
+    test('should return [ServerException] for all other errors', () async {
+      //arrange
+      setupMockHttpClientServerError500();
+      //act
+      final call = authRemoteDataSourceImpl.forgotPassword;
+      //assert
+      expect(() => call(tEmail), throwsA(isA<ServerException>()));
+    });
+  });
+  group('logout', () {
+    final tToken = "AVeryHashedJWTToken";
+    test('should return void on successful call', () async {
+      //arrange
+      when(mockHttpClient.post(any, headers: anyNamed('headers')))
+          .thenAnswer((realInvocation) async => http.Response('success', 200));
+      //act
+      final call = authRemoteDataSourceImpl.logout;
+      //assert
+      expect(() => call(tToken), returnsNormally);
+      verify(mockHttpClient.post(
+        '$BASEURL/api/auth/logout',
+        headers: {
+          'Authorization': 'Bearer ' + tToken,
+          'Content-Type': 'application/json',
+        },
+      ));
+    });
+    test('should throw [ServerException] on all other errors', () async {
+      //arrange
+      when(mockHttpClient.post(any, headers: anyNamed('headers')))
+          .thenAnswer((realInvocation) async => http.Response('failure', 500));
+      //act
+      final call = authRemoteDataSourceImpl.logout;
+      //assert
+      expect(() => call(tToken), throwsA(isA<ServerException>()));
+    });
+  });
+  group('resetPassword', () {
+    final tToken = "AVeryHashedJWTToken";
+    final tNewPassword = "AVeryVeryStrongNewPassword";
+    test('should return void on successful call', () async {
+      //arrange
+      setupMockHttpClientSuccess200();
+      //act
+      final call = authRemoteDataSourceImpl.resetPassword;
+      //assert
+      expect(() => call(tToken, tNewPassword), returnsNormally);
+      verify(mockHttpClient.post(
+        '$BASEURL/api/auth/reset',
+        headers: {'Content-Type': 'application/json'},
+        body: {'token': tToken, 'newPassword': tNewPassword},
+      ));
+    });
+    test('should return void on successful call', () async {
+      //arrange
+      setupMockHttpClientServerError500();
+      //act
+      final call = authRemoteDataSourceImpl.resetPassword;
+      //assert
+      expect(() => call(tToken, tNewPassword),throwsA(isA<ServerException>()));
     });
   });
 }

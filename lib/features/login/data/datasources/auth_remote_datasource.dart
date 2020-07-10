@@ -8,31 +8,31 @@ import 'package:http/http.dart' as http;
 const BASEURL = 'https://nitc-mess.herokuapp.com';
 
 abstract class AuthRemoteDataSource {
-  ///POST http://{BASEURL}/api/auth/login with [username] & [password]
+  ///POST {BASEURL}/api/auth/login with [username] & [password]
   ///Returns [UserModel]
   ///Throws [InvalidCredentialsExceptions] on receving 400 Unauthorized
   ///Throws [ServerException] for all other error codes
   Future<UserModel> login(String username, String password);
 
-  ///POST http://{BASEURL}/api/auth/logout with [token]
+  ///POST {BASEURL}/api/auth/logout with [token]
   ///
   ///Throws [ServerException] for all error codes
-  Future<void> logout();
+  Future<void> logout(String token);
 
-  ///POST http://{BASEURL}/api/auth/forgot with [email]
+  ///POST {BASEURL}/api/auth/forgot with [email]
   ///
   ///Throws [NoMatchFoundException] on finding no matches
   ///Throws [ServerException] for all other error codes
   Future<void> forgotPassword(String email);
 
-  ///POST http://{BASEURL}/api/auth/reset
+  ///POST {BASEURL}/api/auth/reset
   ///
   ///Throws [TokenException] on receving invalid token
   ///Throws [SamePasswordException] on receving new password as the old password
   ///Throws [ServerException] for all other error codes
   Future<void> resetPassword(String token, String newPassword);
 
-  ///POST http://{BASEURL}/api/auth/change
+  ///POST {BASEURL}/api/auth/change
   ///Throws [InvalidCredentialsException] on receving 400 unauthorized
   ///Throws [ServerException] for all other error codes
   Future<void> changePassword(String oldPassword, String newPassword);
@@ -45,7 +45,7 @@ class AuthRemoteDataSourceImpl extends AuthRemoteDataSource {
   @override
   Future<void> changePassword(String oldPassword, String newPassword) async {
     final response = await client.post(
-      'http://$BASEURL/api/auth/change',
+      '$BASEURL/api/auth/change',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -62,21 +62,28 @@ class AuthRemoteDataSourceImpl extends AuthRemoteDataSource {
   }
 
   @override
-  Future<void> forgotPassword(String email) {
-    // TODO: implement forgotPassword
-    throw UnimplementedError();
+  Future<void> forgotPassword(String email) async {
+    final response = await client.post(
+      '$BASEURL/api/auth/forgot',
+      headers: {'Content-Type': 'application/json'},
+      body: {'email': email},
+    );
+    if (response.statusCode != 200) {
+      throw ServerException();
+    } else {
+      return null;
+    }
   }
 
   @override
   Future<UserModel> login(String username, String password) async {
     final response =
-        await client.post('http://$BASEURL/api/auth/login', headers: {
+        await client.post('$BASEURL/api/auth/login', headers: {
       'Content-Type': 'application/json',
     }, body: {
       'username': username,
       'password': password,
     });
-    print(response);
     if (response.statusCode == 200) {
       return UserModel.fromJson(jsonDecode(response.body));
     } else if (response.statusCode == 401) {
@@ -87,14 +94,31 @@ class AuthRemoteDataSourceImpl extends AuthRemoteDataSource {
   }
 
   @override
-  Future<void> logout() {
-    // TODO: implement logout
-    throw UnimplementedError();
+  Future<void> logout(String token) async {
+    final response = await client.post(
+      '$BASEURL/api/auth/logout',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode != 200) {
+      throw ServerException();
+    } else {
+      return null;
+    }
   }
 
   @override
-  Future<void> resetPassword(String token, String newPassword) {
-    // TODO: implement resetPassword
-    throw UnimplementedError();
+  Future<void> resetPassword(String token, String newPassword) async{
+    final response = await client.post('$BASEURL/api/auth/reset',headers: {
+      'Content-Type' : 'application/json'
+    },body: {
+      'token':token,
+      'newPassword':newPassword
+    });
+    if(response.statusCode !=200){
+      throw ServerException();
+    }
   }
 }
