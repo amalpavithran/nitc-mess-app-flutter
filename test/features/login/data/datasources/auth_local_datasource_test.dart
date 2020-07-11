@@ -33,4 +33,23 @@ void main(){
       expect(()=>call(),throwsA(isA<NoTokenException>()));
     });
   });
+  test('clearToken should return normally on successful call', () async {
+    //arrange
+    when(mockSecureStorage.delete(key: anyNamed('key'))).thenAnswer((realInvocation) async => null);
+    //act
+    final call = authLocalDataSourceImpl.clearToken;
+    //assert
+    expect(()=>call(),returnsNormally);
+    verify(mockSecureStorage.delete(key: 'token'));
+  });
+  test('setToken should return normally on successful call', () async {
+    final tToken = 'MyVerySecureHashedJWTToken';
+    //arrange
+    when(mockSecureStorage.write(key: anyNamed('key'),value: anyNamed('value'))).thenAnswer((realInvocation) async => null);
+    //act
+    final call = authLocalDataSourceImpl.setToken;
+    //assert
+    expect(()=>call(tToken),returnsNormally);
+    verify(mockSecureStorage.write(key: 'token',value: tToken));
+  });
 }
