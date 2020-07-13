@@ -7,3 +7,5 @@ class UnauthorizedException implements Exception {}
 class InvalidCredentialsException implements Exception {}
 
 class NoTokenException implements Exception {}
+
+class NoInternetException implements Exception {}

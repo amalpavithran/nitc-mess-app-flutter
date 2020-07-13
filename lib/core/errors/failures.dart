@@ -33,3 +33,11 @@ class UnexpectedFailure extends Failure {
   @override
   bool get stringify => true;
 }
+
+class NoInternetConnection extends Failure {
+  @override
+  List<Object> get props => [];
+
+  @override
+  bool get stringify => true;
+}
