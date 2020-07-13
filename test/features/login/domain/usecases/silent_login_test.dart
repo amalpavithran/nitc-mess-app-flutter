@@ -36,8 +36,7 @@ void main() {
       final result = await usecase(NoParams());
       //assert
       verify(mockAuthRepository.silentLogin());
-      //TODO: Fix this test
-      expect(result, isA<Left>());
+      expect(result, Left(ServerFailure()));
     });
   });
 }

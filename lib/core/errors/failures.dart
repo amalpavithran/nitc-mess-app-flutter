@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 abstract class Failure extends Equatable {}
 
-class ServerFailure implements Failure {
+class ServerFailure extends Failure {
   @override
   List<Object> get props => [];
 
@@ -10,7 +10,7 @@ class ServerFailure implements Failure {
   bool get stringify => true;
 }
 
-class CacheFailure implements Failure {
+class CacheFailure extends Failure {
   @override
   List<Object> get props => [];
 
@@ -18,7 +18,7 @@ class CacheFailure implements Failure {
   bool get stringify => true;
 }
 
-class UnauthorizedFailure implements Failure {
+class UnauthorizedFailure extends Failure {
   @override
   List<Object> get props => [];
 
@@ -26,7 +26,7 @@ class UnauthorizedFailure implements Failure {
   bool get stringify => true;
 }
 
-class UnexpectedFailure implements Failure {
+class UnexpectedFailure extends Failure {
   @override
   List<Object> get props => [];
 
