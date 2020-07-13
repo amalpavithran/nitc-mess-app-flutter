@@ -13,17 +13,17 @@ void main() {
     mockAuthRepository = MockAuthRepository();
     changePassword = ChangePassword(mockAuthRepository);
   });
-  test('ChangePassword should return true from repository', () async {
+  test('ChangePassword should return Right(null) from repository', () async {
     final tOldPassword = 'hello123';
     final tNewPassword = 'hello456';
     //arrange
     when(mockAuthRepository.changePassword(any, any))
-        .thenAnswer((realInvocation) async => Right(true));
+        .thenAnswer((realInvocation) async => Right(null));
     //act
     final result = await changePassword(
         Params(oldPassword: tOldPassword, newPassword: tNewPassword));
     //assert
     verify(mockAuthRepository.changePassword(tOldPassword, tNewPassword));
-    expect(result, Right(true));
+    expect(result, Right(null));
   });
 }

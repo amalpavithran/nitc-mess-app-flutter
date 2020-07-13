@@ -14,15 +14,15 @@ void main(){
     mockAuthRepository = MockAuthRepository();
     resetPassword = ResetPassword(mockAuthRepository);
   });
-  test('ResetPassword should return true from repository', () async {
+  test('ResetPassword should return Right(null) from repository', () async {
     final tToken = 'testtoken';
     final tNewPassword = 'NewAwesomePassword';
     //arrange
-    when(mockAuthRepository.resetPassword(tToken, tNewPassword)).thenAnswer((realInvocation) async => Right(true));
+    when(mockAuthRepository.resetPassword(tToken, tNewPassword)).thenAnswer((realInvocation) async => Right(null));
     //act
     final result = await resetPassword(Params(token: tToken,newPassword: tNewPassword)); 
     //assert
     verify(mockAuthRepository.resetPassword(tToken, tNewPassword));
-    expect(result,Right(true));
+    expect(result,Right(null));
   });
 }

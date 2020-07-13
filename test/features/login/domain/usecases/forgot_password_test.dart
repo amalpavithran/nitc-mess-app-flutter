@@ -13,14 +13,14 @@ void main(){
     mockAuthRepository = MockAuthRepository();
     forgotPassword = ForgotPassword(mockAuthRepository);
   });
-  test('ForgotPassword should return true from repository', () async {
+  test('ForgotPassword should return Right(null) from repository', () async {
     final tEmail = 'test@email.com';
     //arrange
-    when(mockAuthRepository.forgotPassword(tEmail)).thenAnswer((_) async => Right(true));
+    when(mockAuthRepository.forgotPassword(tEmail)).thenAnswer((_) async => Right(null));
     //act
     final result = await forgotPassword(Params(email: tEmail));
     //assert
     verify(mockAuthRepository.forgotPassword(tEmail));
-    expect(result,Right(true));
+    expect(result,Right(null));
   });
 }

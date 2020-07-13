@@ -4,12 +4,12 @@ import 'package:dartz/dartz.dart';
 import 'package:mess_management_flutter/core/usecases/usecase.dart';
 import 'package:mess_management_flutter/features/login/domain/repositories/auth_repository.dart';
 
-class ChangePassword implements UseCase<bool, Params> {
+class ChangePassword implements UseCase<void, Params> {
   final AuthRepository authRepository;
 
   ChangePassword(this.authRepository);
   @override
-  Future<Either<Failure, bool>> call(Params params) {
+  Future<Either<Failure, void>> call(Params params) {
     return authRepository.changePassword(params.oldPassword, params.newPassword);
   }
 }
