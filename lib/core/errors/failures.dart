@@ -41,3 +41,10 @@ class NoInternetConnection extends Failure {
   @override
   bool get stringify => true;
 }
+class InvalidDataFailure extends Failure {
+  @override
+  List<Object> get props => [];
+
+  @override
+  bool get stringify => true;
+}

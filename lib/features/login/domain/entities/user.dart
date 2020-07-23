@@ -27,4 +27,14 @@ class User extends Equatable {
         hostelName,
         roomNumber,
       ];
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      name: json['name'],
+      email: json['email'],
+      rollNumber: json['rollNumber'],
+      mess: json['mess'],
+      hostelName: json['hostelName'],
+      roomNumber: json['roomNumber'],
+    );
+  }
 }
