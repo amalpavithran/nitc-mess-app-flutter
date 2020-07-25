@@ -193,4 +193,30 @@ void main() {
       ]);
     });
   });
+  group('logout', () {
+    final tToken = 'AnAmazingTokenOfAppreciation';
+    test('should remove data from cache', () async {
+      //arrange
+      when(localDataSource.getToken())
+          .thenAnswer((realInvocation) async => tToken);
+      when(localDataSource.setUser(user: anyNamed('user')))
+          .thenAnswer((realInvocation) async => null);
+      when(localDataSource.clearToken())
+          .thenAnswer((realInvocation) async => null);
+      when(remoteDataSource.logout(any))
+          .thenAnswer((realInvocation) async => null);
+      //act
+      final result = await repository.logout();
+      //assert
+      expect(result, Right(null));
+      verifyInOrder([
+        localDataSource.getToken(),
+        remoteDataSource.logout(tToken),
+        localDataSource.clearToken(),
+        localDataSource.setUser(user: null),
+      ]);
+      verifyNoMoreInteractions(localDataSource);
+      verifyNoMoreInteractions(remoteDataSource);
+    });
+  });
 }

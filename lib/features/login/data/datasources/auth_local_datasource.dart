@@ -20,7 +20,7 @@ abstract class AuthLocalDataSource {
   Future<void> setToken(String token);
 
   ///Stores [User] to Cache
-  ///Clears User Data
+  ///Clears [User] from Cache if argument is null
   ///
   Future<void> setUser({@required UserModel user});
 
@@ -58,6 +58,10 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<void> setUser({UserModel user}) async {
+    if (user == null) {
+      await sharedPreferences.remove('user');
+      return null;
+    }
     await sharedPreferences.setString('user', jsonEncode(user.toJson()));
     return null;
   }

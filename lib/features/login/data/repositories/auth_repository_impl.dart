@@ -71,9 +71,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> logout() {
-    // TODO: implement logout
-    throw UnimplementedError();
+  Future<Either<Failure, void>> logout() async {
+    try {
+      final token = await localDataSource.getToken();
+      await remoteDataSource.logout(token);
+      await localDataSource.clearToken();
+      await localDataSource.setUser(user: null);
+      return Right(null);
+    } catch (e) {
+      return Left(UnexpectedFailure());
+    }
   }
 
   @override
