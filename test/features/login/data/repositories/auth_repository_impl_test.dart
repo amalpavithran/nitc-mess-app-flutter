@@ -10,7 +10,6 @@ import 'package:mess_management_flutter/features/login/data/datasources/auth_rem
 import 'package:mess_management_flutter/features/login/data/models/user_model.dart';
 import 'package:mess_management_flutter/features/login/data/repositories/auth_repository_impl.dart';
 import 'package:mockito/mockito.dart';
-import 'package:validators/validators.dart';
 
 import '../../../../fixtures/fixture_reader.dart';
 
@@ -217,6 +216,86 @@ void main() {
       ]);
       verifyNoMoreInteractions(localDataSource);
       verifyNoMoreInteractions(remoteDataSource);
+    });
+  });
+  group('resetPassword', () {
+    final tToken = "MySuperAwesomeToken";
+    final tNewPassword = "MyAmazingNewPassword";
+    test('should return Right(null) on success', () async {
+      //arrange
+      when(remoteDataSource.resetPassword(any, any))
+          .thenAnswer((realInvocation) async => null);
+      withNetwork(true);
+      //act
+      final result = await repository.resetPassword(tToken, tNewPassword);
+      //assert
+      verify(remoteDataSource.resetPassword(tToken, tNewPassword));
+      expect(result, Right(null));
+    });
+    test('should return Left(ServerFailure) on ServerException', () async {
+      //arrange
+      when(remoteDataSource.resetPassword(any, any))
+          .thenThrow(ServerException());
+      withNetwork(true);
+      //act
+      final result = await repository.resetPassword(tToken, tNewPassword);
+      //assert
+      verify(remoteDataSource.resetPassword(tToken, tNewPassword));
+      expect(result, Left(ServerFailure()));
+    });
+    test('should return Left(UnexpectedFailure) on any other errors', () async {
+      //arrange
+      when(remoteDataSource.resetPassword(any, any))
+          .thenThrow(UnimplementedError());
+      withNetwork(true);
+      //act
+      final result = await repository.resetPassword(tToken, tNewPassword);
+      //assert
+      verify(remoteDataSource.resetPassword(tToken, tNewPassword));
+      expect(result, Left(UnexpectedFailure()));
+    });
+    test('should return Left(NoInternetConnection) on not having connection',
+        () async {
+      //arrange
+      withNetwork(false);
+      //act
+      final result = await repository.resetPassword(tToken, tNewPassword);
+      //assert
+      verifyZeroInteractions(remoteDataSource);
+      expect(result, Left(NoInternetConnection()));
+    });
+  });
+  group('silentLogin', (){
+    final tToken = "MySuperToken";
+    final tUser = UserModel.fromJson(jsonDecode(fixture('login_success.json')));
+    test('should return Right(null) when already authenticated', () async {
+      
+      //arrange
+      when(localDataSource.getToken()).thenAnswer((realInvocation) async => tToken);
+      when(localDataSource.getUser()).thenAnswer((realInvocation) async => tUser);
+      //act
+      final result = await repository.silentLogin();
+      //assert
+      expect(result,Right(null));
+      verifyInOrder([localDataSource.getToken(),localDataSource.getUser()]);
+    });
+    test('should return Left(Unauthorized) if token is null', () async {
+      //arrange
+      when(localDataSource.getToken()).thenAnswer((realInvocation) async => null);
+      when(localDataSource.getUser()).thenAnswer((realInvocation) async => tUser);
+      //act
+      final result = await repository.silentLogin();
+      //assert
+      expect(result,Left(UnauthorizedFailure()));
+    });
+    test('should return Left(Unauthorized) if User is null', () async {
+      //arrange
+      when(localDataSource.getToken()).thenAnswer((realInvocation) async => tToken);
+      when(localDataSource.getUser()).thenAnswer((realInvocation) async => null);
+      //act
+      final result = await repository.silentLogin();
+      //assert
+      expect(result,Left(UnauthorizedFailure()));
     });
   });
 }

@@ -14,9 +14,13 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
+
   Future<Either<Failure, void>> _exceptionHandler(
       Future<Either<Failure, void>> body()) async {
     try {
+      if (!await networkInfo.isConnected) {
+        return Left(NoInternetConnection());
+      }
       return await body();
     } on ServerException {
       return Left(ServerFailure());
@@ -35,9 +39,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> changePassword(
       String oldPassword, String newPassword) async {
     return _exceptionHandler(() async {
-      if (!await networkInfo.isConnected) {
-        return Left(NoInternetConnection());
-      }
       await remoteDataSource.changePassword(oldPassword, newPassword);
       return Right(null);
     });
@@ -86,13 +87,19 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> resetPassword(
       String token, String newPassword) {
-    // TODO: implement resetPassword
-    throw UnimplementedError();
+    return _exceptionHandler(() async {
+      await remoteDataSource.resetPassword(token, newPassword);
+      return Right(null);
+    });
   }
 
   @override
-  Future<Either<Failure, User>> silentLogin() {
-    // TODO: implement silentLogin
-    throw UnimplementedError();
+  Future<Either<Failure, User>> silentLogin() async {
+    final token = await localDataSource.getToken();
+    final user = await localDataSource.getUser();
+    if (token == null || user == null) {
+      return Left(UnauthorizedFailure());
+    }
+    return Right(null);
   }
 }
