@@ -204,6 +204,7 @@ void main() {
           .thenAnswer((realInvocation) async => null);
       when(remoteDataSource.logout(any))
           .thenAnswer((realInvocation) async => null);
+      when(networkInfo.isConnected).thenAnswer((realInvocation) async => true);
       //act
       final result = await repository.logout();
       //assert
@@ -268,7 +269,7 @@ void main() {
   group('silentLogin', (){
     final tToken = "MySuperToken";
     final tUser = UserModel.fromJson(jsonDecode(fixture('login_success.json')));
-    test('should return Right(null) when already authenticated', () async {
+    test('should return Right(User) when already authenticated', () async {
       
       //arrange
       when(localDataSource.getToken()).thenAnswer((realInvocation) async => tToken);
@@ -276,7 +277,7 @@ void main() {
       //act
       final result = await repository.silentLogin();
       //assert
-      expect(result,Right(null));
+      expect(result,Right(tUser));
       verifyInOrder([localDataSource.getToken(),localDataSource.getUser()]);
     });
     test('should return Left(Unauthorized) if token is null', () async {

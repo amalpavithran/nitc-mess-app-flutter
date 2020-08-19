@@ -3,7 +3,6 @@ import 'package:mess_management_flutter/core/errors/exceptions.dart';
 import 'package:mess_management_flutter/core/network/network_info.dart';
 import 'package:mess_management_flutter/features/login/data/datasources/auth_local_datasource.dart';
 import 'package:mess_management_flutter/features/login/data/datasources/auth_remote_datasource.dart';
-import 'package:mess_management_flutter/features/login/data/models/user_model.dart';
 import 'package:mess_management_flutter/features/login/domain/entities/user.dart';
 import 'package:mess_management_flutter/core/errors/failures.dart';
 import 'package:dartz/dartz.dart';
@@ -21,6 +20,18 @@ class AuthRepositoryImpl implements AuthRepository {
       if (!await networkInfo.isConnected) {
         return Left(NoInternetConnection());
       }
+      return await body();
+    } on ServerException {
+      return Left(ServerFailure());
+    } catch (e) {
+      print(e);
+      return Left(UnexpectedFailure());
+    }
+  }
+
+  Future<Either<Failure, User>> _exceptionHandlerUserReturn(
+      Future<Either<Failure, User>> body()) async {
+    try {
       return await body();
     } on ServerException {
       return Left(ServerFailure());
@@ -59,29 +70,23 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, User>> login(String username, String password) async {
-    try {
+    return _exceptionHandlerUserReturn(() async {
       final user = await remoteDataSource.login(username, password);
       await localDataSource.setUser(user: user);
       await localDataSource.setToken(user.token);
       return Right(user);
-    } on ServerException {
-      return Left(ServerFailure());
-    } catch (e) {
-      return Left(UnexpectedFailure());
-    }
+    });
   }
 
   @override
   Future<Either<Failure, void>> logout() async {
-    try {
+    return _exceptionHandler(() async {
       final token = await localDataSource.getToken();
       await remoteDataSource.logout(token);
       await localDataSource.clearToken();
       await localDataSource.setUser(user: null);
       return Right(null);
-    } catch (e) {
-      return Left(UnexpectedFailure());
-    }
+    });
   }
 
   @override
@@ -95,11 +100,13 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, User>> silentLogin() async {
-    final token = await localDataSource.getToken();
-    final user = await localDataSource.getUser();
-    if (token == null || user == null) {
-      return Left(UnauthorizedFailure());
-    }
-    return Right(null);
+    return _exceptionHandlerUserReturn(() async {
+      final token = await localDataSource.getToken();
+      final user = await localDataSource.getUser();
+      if (token == null || user == null) {
+        return Left(UnauthorizedFailure());
+      }
+      return Right(user);
+    });
   }
 }
