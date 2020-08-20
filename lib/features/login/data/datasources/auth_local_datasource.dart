@@ -34,7 +34,10 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final FlutterSecureStorage storage;
   final SharedPreferences sharedPreferences;
 
-  AuthLocalDataSourceImpl(this.storage, this.sharedPreferences);
+  AuthLocalDataSourceImpl({
+    @required this.storage,
+    @required this.sharedPreferences,
+  });
   @override
   Future<String> getToken() async {
     final result = await storage.read(key: 'token');

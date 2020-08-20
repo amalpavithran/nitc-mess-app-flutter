@@ -22,8 +22,8 @@ void main() {
   setUp(() {
     mockSecureStorage = MockSecureStorage();
     mockSharedPreferences = MockSharedPreferences();
-    authLocalDataSourceImpl =
-        AuthLocalDataSourceImpl(mockSecureStorage, mockSharedPreferences);
+    authLocalDataSourceImpl = AuthLocalDataSourceImpl(
+        sharedPreferences: mockSharedPreferences, storage: mockSecureStorage);
   });
   group('getToken', () {
     final tToken = "MyAmazingHashedToken";
@@ -93,13 +93,15 @@ void main() {
     expect(result, tUser);
     verify(mockSharedPreferences.getString('user'));
   });
-  test('setUser should remove User from cache on receiving null as argument', () async {
+  test('setUser should remove User from cache on receiving null as argument',
+      () async {
     //arrange
-    when(mockSharedPreferences.remove(any)).thenAnswer((realInvocation) async => true);
+    when(mockSharedPreferences.remove(any))
+        .thenAnswer((realInvocation) async => true);
     //act
     final call = authLocalDataSourceImpl.setUser;
     //assert
-    expect(()=>call(user: null),returnsNormally);
+    expect(() => call(user: null), returnsNormally);
     verify(mockSharedPreferences.remove('user'));
     verifyNoMoreInteractions(mockSharedPreferences);
   });

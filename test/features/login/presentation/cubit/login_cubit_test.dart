@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mess_management_flutter/core/errors/failures.dart';
 import 'package:mess_management_flutter/features/login/domain/entities/user.dart';
 import 'package:mess_management_flutter/features/login/domain/usecases/login.dart';
+import 'package:mess_management_flutter/features/login/domain/usecases/silent_login.dart';
 import 'package:mess_management_flutter/features/login/presentation/cubit/login_cubit.dart';
 import 'package:mockito/mockito.dart';
 
@@ -11,12 +12,19 @@ import '../../../../fixtures/fixture_reader.dart';
 
 class MockLogin extends Mock implements Login {}
 
+class MockSilentLogin extends Mock implements SilentLogin {}
+
 void main() {
   MockLogin mockLogin;
+  MockSilentLogin mockSilentLogin;
   LoginCubit loginCubit;
   setUp(() {
     mockLogin = MockLogin();
-    loginCubit = LoginCubit(mockLogin);
+    mockSilentLogin = MockSilentLogin();
+    loginCubit = LoginCubit(
+      loginUsecase: mockLogin,
+      silentLoginUsecase: mockSilentLogin,
+    );
   });
   group('Login', () {
     test('Initial State should be LoginInitial', () async {
@@ -57,6 +65,19 @@ void main() {
       expectLater(loginCubit, emitsInOrder(expected));
       //act
       loginCubit.login(tUsername, tPassword);
+    });
+  });
+  group('SilentLogin', () {
+    final tUser = User.fromJson(jsonDecode(fixture('login_success.json')));
+    test('should emit [SilentLoginSuccess] on success', () async {
+      //arrange
+      when(mockSilentLogin(any))
+          .thenAnswer((realInvocation) async => Right(tUser));
+      //assert
+      final expected = [SilentLoginSuccess()];
+      expectLater(loginCubit, emitsInOrder(expected));
+      //act
+      loginCubit.silentLogin();
     });
   });
 }

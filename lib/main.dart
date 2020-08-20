@@ -1,40 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-import 'dashboard.dart';
-import 'login.dart';
+import 'package:mess_management_flutter/core/strings.dart';
+import 'package:mess_management_flutter/features/login/presentation/pages/login_page.dart';
+import 'package:mess_management_flutter/injection_container.dart' as di;
+import 'package:mess_management_flutter/styles.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final _storage = new FlutterSecureStorage();
-  final _token  = await _storage.read(key: 'token');
-  Widget defaultHome = Login();
-  if(_token!=null){
-    defaultHome = Dashboard();
+  await di.init();
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: TITLE,
+      theme: theme,
+      home: LoginPage(),
+    );
   }
-  runApp(MaterialApp(
-    theme: ThemeData(
-      primaryColor: Colors.black,
-      secondaryHeaderColor: Colors.black,
-      accentColor: Colors.black,
-      primaryTextTheme: TextTheme(
-        title: TextStyle(
-          color: Colors.black
-        )
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        labelStyle: TextStyle(color: Colors.black),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.black)
-        )
-      ),
-      fontFamily: ''
-    ),
-    title:'NITC MESS',
-    home: defaultHome,
-    routes: {
-      '/login':(context)=>Login(),
-      '/dashboard':(context)=>Dashboard()
-    },
-    ));
 }

@@ -9,6 +9,16 @@ class LoginInitial extends LoginState {
   List<Object> get props => [];
 }
 
+class SilentLoginSuccess extends LoginState {
+  @override
+  List<Object> get props => [];
+}
+
+class SilentLoginFailure extends LoginState {
+  @override
+  List<Object> get props => [];
+}
+
 class LoginLoading extends LoginState {
   @override
   List<Object> get props => [];
