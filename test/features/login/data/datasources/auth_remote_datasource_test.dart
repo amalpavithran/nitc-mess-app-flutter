@@ -58,10 +58,10 @@ void main() {
       //assert
       verify(mockHttpClient.post('$BASEURL/api/auth/login', headers: {
         'Content-Type': 'application/json',
-      }, body: {
+      }, body: jsonEncode({
         'username': tUsername,
         'password': tPassword,
-      }));
+      })));
     });
     test('should return [UserModel] on status code 200', () async {
       //arrange
@@ -103,10 +103,10 @@ void main() {
       //assert
       verify(mockHttpClient.post('$BASEURL/api/auth/change', headers: {
         'Content-Type': 'application/json',
-      }, body: {
+      }, body: jsonEncode({
         'oldPassword': tOldPassword,
         'newPassword': tNewPassword,
-      }));
+      })));
     });
     test('should return void on success', () async {
       //arrange
@@ -137,7 +137,7 @@ void main() {
       //assert
       verify(mockHttpClient.post('$BASEURL/api/auth/forgot',
           headers: {'Content-Type': 'application/json'},
-          body: {'email': tEmail}));
+          body: jsonEncode({'email': tEmail})));
     });
     test('should return void on success', () async {
       //arrange
@@ -197,10 +197,10 @@ void main() {
       verify(mockHttpClient.post(
         '$BASEURL/api/auth/reset',
         headers: {'Content-Type': 'application/json'},
-        body: {'token': tToken, 'newPassword': tNewPassword},
+        body: jsonEncode({'token': tToken, 'newPassword': tNewPassword}),
       ));
     });
-    test('should return void on successful call', () async {
+    test('should throw [ServerException] on failed call', () async {
       //arrange
       setupMockHttpClientServerError500();
       //act

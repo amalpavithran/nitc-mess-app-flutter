@@ -116,8 +116,8 @@ class AuthRemoteDataSourceImpl extends AuthRemoteDataSource {
     final response = await client.post('$BASEURL/api/auth/reset',
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'token': token, 'newPassword': newPassword}));
-    if (response.statusCode == 200) {
-      return null;
+    if (response.statusCode != 200) {
+      throw ServerException();
     }
   }
 }
