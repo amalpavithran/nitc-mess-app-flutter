@@ -33,7 +33,7 @@ class LoginSuccess extends LoginState {
 }
 
 class LoginFailure extends LoginState {
-  final message;
+  final String message;
 
   LoginFailure(this.message);
   @override

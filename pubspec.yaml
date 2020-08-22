@@ -51,7 +51,8 @@ flutter:
   assets:
     - assets/icon1.png
     - assets/thumbnail.png
-    # - assets/splash.png
+    - assets/splash2.png
+    - assets/splash.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

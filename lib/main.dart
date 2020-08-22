@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mess_management_flutter/core/strings.dart';
+import 'package:mess_management_flutter/strings.dart';
 import 'package:mess_management_flutter/features/login/presentation/pages/login_page.dart';
 import 'package:mess_management_flutter/injection_container.dart' as di;
 import 'package:mess_management_flutter/styles.dart';

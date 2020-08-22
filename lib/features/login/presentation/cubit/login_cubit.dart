@@ -11,6 +11,7 @@ part 'login_state.dart';
 
 const String SERVER_FAILURE_MESSAGE = "Server Error";
 const String UNEXPECTED_FAILURE_MESSAGE = "An Unexpected Error Has Occoured";
+const String UNAUTHORIZED_FAILURE_MESSAGE = "Invalid Username or Password";
 
 class LoginCubit extends Cubit<LoginState> {
   final Login loginUsecase;
@@ -48,6 +49,8 @@ class LoginCubit extends Cubit<LoginState> {
     switch (failure.runtimeType) {
       case ServerFailure:
         return SERVER_FAILURE_MESSAGE;
+      case UnauthorizedFailure:
+        return UNAUTHORIZED_FAILURE_MESSAGE;
       default:
         return UNEXPECTED_FAILURE_MESSAGE;
     }

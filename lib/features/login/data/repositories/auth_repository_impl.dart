@@ -35,7 +35,10 @@ class AuthRepositoryImpl implements AuthRepository {
       return await body();
     } on ServerException {
       return Left(ServerFailure());
+    } on InvalidCredentialsException {
+      return Left(UnauthorizedFailure());
     } catch (e) {
+      print(e);
       return Left(UnexpectedFailure());
     }
   }

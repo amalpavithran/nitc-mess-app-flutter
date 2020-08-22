@@ -49,10 +49,10 @@ class AuthRemoteDataSourceImpl extends AuthRemoteDataSource {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: {
+      body: jsonEncode({
         'oldPassword': oldPassword,
         'newPassword': newPassword,
-      },
+      }),
     );
     if (response.statusCode != 200) {
       throw ServerException();
@@ -66,7 +66,7 @@ class AuthRemoteDataSourceImpl extends AuthRemoteDataSource {
     final response = await client.post(
       '$BASEURL/api/auth/forgot',
       headers: {'Content-Type': 'application/json'},
-      body: {'email': email},
+      body: json.encode({'email': email}),
     );
     if (response.statusCode != 200) {
       throw ServerException();
@@ -77,13 +77,15 @@ class AuthRemoteDataSourceImpl extends AuthRemoteDataSource {
 
   @override
   Future<UserModel> login(String username, String password) async {
-    final response =
-        await client.post('$BASEURL/api/auth/login', headers: {
-      'Content-Type': 'application/json',
-    }, body: {
-      'username': username,
-      'password': password,
-    });
+    final response = await client.post('$BASEURL/api/auth/login',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+        }));
+    print(response.statusCode);
     if (response.statusCode == 200) {
       return UserModel.fromJson(jsonDecode(response.body));
     } else if (response.statusCode == 401) {
@@ -110,15 +112,12 @@ class AuthRemoteDataSourceImpl extends AuthRemoteDataSource {
   }
 
   @override
-  Future<void> resetPassword(String token, String newPassword) async{
-    final response = await client.post('$BASEURL/api/auth/reset',headers: {
-      'Content-Type' : 'application/json'
-    },body: {
-      'token':token,
-      'newPassword':newPassword
-    });
-    if(response.statusCode !=200){
-      throw ServerException();
+  Future<void> resetPassword(String token, String newPassword) async {
+    final response = await client.post('$BASEURL/api/auth/reset',
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': token, 'newPassword': newPassword}));
+    if (response.statusCode == 200) {
+      return null;
     }
   }
 }
