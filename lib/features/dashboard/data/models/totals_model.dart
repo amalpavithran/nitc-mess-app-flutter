@@ -13,7 +13,16 @@ class TotalsModel {
     @required this.totalItems,
   });
 
-  factory TotalsModel.fromJson(List<dynamic> json) {
+  factory TotalsModel.fromJson(Map<String, dynamic> json) {
+    return TotalsModel(
+      totalDailyCharge: json['totalDailyCharge'],
+      totalDaysDined: json['totalDaysDined'],
+      totalExtra: json['totalExtra'],
+      totalItems: json['totalItems'],
+    );
+  }
+
+  factory TotalsModel.fromJsonDuesList(List<dynamic> json) {
     double totalDailyCharge = 0;
     double totalDaysDined = 0;
     double totalExtra = 0;
