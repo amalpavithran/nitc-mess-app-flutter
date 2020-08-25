@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mess_management_flutter/core/errors/exceptions.dart';
 import 'package:mess_management_flutter/features/dashboard/data/models/dues_model.dart';
 import 'package:mess_management_flutter/features/dashboard/data/models/totals_model.dart';
+import 'package:mess_management_flutter/features/dashboard/domain/entities/dues.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class DuesLocalDataSource {
@@ -15,7 +16,7 @@ abstract class DuesLocalDataSource {
   ///Sets Dues in Shared Preferences from json
   ///
   ///Throws [Null Exception] if json is null
-  Future<List<DuesModel>> setExtras(List<dynamic> json);
+  Future<List<DuesModel>> setDues(List<dynamic> json);
 
   ///Gets Totals from Shared Preferences
   ///
@@ -45,9 +46,13 @@ class DuesLocalDataSourceImpl implements DuesLocalDataSource {
   }
 
   @override
-  Future<List<DuesModel>> setExtras(json) {
-    // TODO: implement setExtras
-    throw UnimplementedError();
+  Future<List<DuesModel>> setDues(json) async{
+    if(json == null){
+      throw NullException();
+    }
+    List<Dues> dues = duesFromJsonList(json);
+    await sharedPreferences.setString('dues', duesToJsonList(dues));
+    return dues;
   }
 
   @override

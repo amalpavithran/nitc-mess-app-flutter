@@ -1,39 +1,45 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:mess_management_flutter/features/dashboard/domain/entities/dues.dart';
+import 'package:validators/sanitizers.dart';
 
 class DuesModel extends Dues {
   DuesModel({
-    @required price,
-    @required title,
-    @required description,
-    @required date,
+    @required double price,
+    @required String title,
+    @required String description,
+    @required DateTime date,
   }) : super(
           price: price,
           title: title,
           description: description,
-          date: DateTime.fromMillisecondsSinceEpoch(date),
+          date: date,
         );
 
-  Map<String, dynamic> toJson(Dues dues) {
+  factory DuesModel.fromJson(Map<String, dynamic> json) {
+    return DuesModel(
+      price: json['price'].toDouble(),
+      title: json['title'],
+      description: json['description'],
+      date: DateTime.fromMillisecondsSinceEpoch(json['date']),
+    );
+  }
+  Map<String, dynamic> toJson() {
     return {
-      'date': dues.date,
-      'description': dues.description,
-      'price': dues.price,
-      'title': dues.title
+      'date': this.date.millisecondsSinceEpoch,
+      'description': this.description,
+      'price': this.price,
+      'title': this.title
     };
   }
 }
 
-List<Dues> duesFromJsonList(List<Map<String, dynamic>> json) {
+List<Dues> duesFromJsonList(List<dynamic> json) {
   json.retainWhere((element) => element['description'] != 'Daily Charges');
-  return json
-      .map(
-        (e) => DuesModel(
-          price: e['price'],
-          title: e['title'],
-          description: e['description'],
-          date: e['date'],
-        ),
-      )
-      .toList();
+  return json.map((e) => DuesModel.fromJson(e)).toList();
+}
+
+String duesToJsonList(List<DuesModel> dues) {
+  return jsonEncode(dues.map((e) => e.toJson()).toList());
 }

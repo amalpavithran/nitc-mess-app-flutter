@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mess_management_flutter/core/errors/exceptions.dart';
 import 'package:mess_management_flutter/features/dashboard/data/datasources/dues_local_datasource.dart';
+import 'package:mess_management_flutter/features/dashboard/data/models/dues_model.dart';
 import 'package:mess_management_flutter/features/dashboard/data/models/totals_model.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,11 +40,30 @@ void main() {
     });
     test('should throw [Null Exception] when json is null', () async {
       //arrange
-      when(mockSharedPreferences.setString(any, any))
-          .thenAnswer((realInvocation) async => true);
       //act
       final call = duesLocalDataSource.setTotals;
       //assert
+      verifyZeroInteractions(mockSharedPreferences);
+      expect(()=>call(null),throwsA(isA<NullException>()));
+    });
+  });
+  group('setDues',(){
+    test('should return List<DuesModel> on successful call', () async {
+      //arrange
+      final tData = jsonDecode(fixture('dues_success.json'));
+      when(mockSharedPreferences.setString(any, any)).thenAnswer((realInvocation) async=> true);
+      //act
+      final result = await duesLocalDataSource.setDues(tData);
+      //assert
+      verify(mockSharedPreferences.setString('dues', duesToJsonList(duesFromJsonList(tData))));
+      expect(result, isA<List<DuesModel>>());
+    });
+    test('should throw [NullException] on json being null', () async {
+      //arrange
+      //act
+      final call =  duesLocalDataSource.setDues;
+      //assert
+      verifyZeroInteractions(mockSharedPreferences);
       expect(()=>call(null),throwsA(isA<NullException>()));
     });
   });
