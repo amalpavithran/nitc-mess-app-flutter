@@ -40,9 +40,13 @@ class DuesLocalDataSourceImpl implements DuesLocalDataSource {
   }
 
   @override
-  Future<TotalsModel> getTotals() {
-    // TODO: implement getTotals
-    throw UnimplementedError();
+  Future<TotalsModel> getTotals() async{
+    final result = sharedPreferences.getString('totals');
+    if(result==null){
+      throw NullException();
+    }else{
+      return TotalsModel.fromJson(jsonDecode(result));
+    }
   }
 
   @override
@@ -60,7 +64,7 @@ class DuesLocalDataSourceImpl implements DuesLocalDataSource {
     if(json==null){
       throw NullException();
     }
-    final totals = TotalsModel.fromJson(json);
+    final totals = TotalsModel.fromJsonDuesList(json);
     await sharedPreferences.setString('totals', jsonEncode(totals.toJson()));
     return totals;
   }
