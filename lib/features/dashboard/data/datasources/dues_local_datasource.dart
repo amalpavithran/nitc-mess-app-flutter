@@ -34,24 +34,20 @@ class DuesLocalDataSourceImpl implements DuesLocalDataSource {
 
   DuesLocalDataSourceImpl({@required this.sharedPreferences});
   @override
-  Future<List<DuesModel>> getDues() {
-    // TODO: implement getDues
-    throw UnimplementedError();
+  Future<List<DuesModel>> getDues() async{
+    final result = sharedPreferences.getString('dues');
+    return duesFromJsonList(jsonDecode(result));
   }
 
   @override
-  Future<TotalsModel> getTotals() async{
+  Future<TotalsModel> getTotals() async {
     final result = sharedPreferences.getString('totals');
-    if(result==null){
-      throw NullException();
-    }else{
-      return TotalsModel.fromJson(jsonDecode(result));
-    }
+    return TotalsModel.fromJson(jsonDecode(result));
   }
 
   @override
-  Future<List<DuesModel>> setDues(json) async{
-    if(json == null){
+  Future<List<DuesModel>> setDues(json) async {
+    if (json == null) {
       throw NullException();
     }
     List<Dues> dues = duesFromJsonList(json);
@@ -60,8 +56,8 @@ class DuesLocalDataSourceImpl implements DuesLocalDataSource {
   }
 
   @override
-  Future<TotalsModel> setTotals(json) async{
-    if(json==null){
+  Future<TotalsModel> setTotals(json) async {
+    if (json == null) {
       throw NullException();
     }
     final totals = TotalsModel.fromJsonDuesList(json);

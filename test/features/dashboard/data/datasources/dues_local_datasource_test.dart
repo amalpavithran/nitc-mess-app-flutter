@@ -36,8 +36,8 @@ void main() {
       expect(result, isA<TotalsModel>());
       expect(result.totalDailyCharge, 160);
       expect(result.totalDaysDined, 2);
-      expect(result.totalExtra,20);
-      expect(result.totalItems,3);
+      expect(result.totalExtra, 20);
+      expect(result.totalItems, 3);
     });
     test('should throw [Null Exception] when json is null', () async {
       //arrange
@@ -45,44 +45,55 @@ void main() {
       final call = duesLocalDataSource.setTotals;
       //assert
       verifyZeroInteractions(mockSharedPreferences);
-      expect(()=>call(null),throwsA(isA<NullException>()));
+      expect(() => call(null), throwsA(isA<NullException>()));
     });
   });
-  group('setDues',(){
+  group('setDues', () {
     test('should return List<DuesModel> on successful call', () async {
       //arrange
       final tData = jsonDecode(fixture('dues_success.json'));
-      when(mockSharedPreferences.setString(any, any)).thenAnswer((realInvocation) async=> true);
+      when(mockSharedPreferences.setString(any, any))
+          .thenAnswer((realInvocation) async => true);
       //act
       final result = await duesLocalDataSource.setDues(tData);
       //assert
-      verify(mockSharedPreferences.setString('dues', duesToJsonList(duesFromJsonList(tData))));
+      verify(mockSharedPreferences.setString(
+          'dues', duesToJsonList(duesFromJsonList(tData))));
       expect(result, isA<List<DuesModel>>());
     });
     test('should throw [NullException] on json being null', () async {
       //arrange
       //act
-      final call =  duesLocalDataSource.setDues;
+      final call = duesLocalDataSource.setDues;
       //assert
       verifyZeroInteractions(mockSharedPreferences);
-      expect(()=>call(null),throwsA(isA<NullException>()));
+      expect(() => call(null), throwsA(isA<NullException>()));
     });
   });
-  group('getTotals',(){
-    test('should return [TotalsModel] on successful call', () async {
-      //arrange
-      final tData = fixture('totals_success.json');
-      final tMapData = jsonDecode(tData);
-      when(mockSharedPreferences.getString(any)).thenReturn(tData);
-      //act
-      final result = await duesLocalDataSource.getTotals();
-      //assert
-      verify(mockSharedPreferences.getString('totals'));
-      expect(result,isA<TotalsModel>());
-      expect(result.totalDailyCharge,tMapData['totalDailyCharge']);
-      expect(result.totalDaysDined,tMapData['totalDaysDined']);
-      expect(result.totalExtra,tMapData['totalExtra']);
-      expect(result.totalItems,tMapData['totalItems']);
-    });
+  test('getTotals should return [TotalsModel] on successful call', () async {
+    //arrange
+    final tData = fixture('totals_success.json');
+    final tMapData = jsonDecode(tData);
+    when(mockSharedPreferences.getString(any)).thenReturn(tData);
+    //act
+    final result = await duesLocalDataSource.getTotals();
+    //assert
+    verify(mockSharedPreferences.getString('totals'));
+    expect(result, isA<TotalsModel>());
+    expect(result.totalDailyCharge, tMapData['totalDailyCharge']);
+    expect(result.totalDaysDined, tMapData['totalDaysDined']);
+    expect(result.totalExtra, tMapData['totalExtra']);
+    expect(result.totalItems, tMapData['totalItems']);
+  });
+  test('getDues', () async {
+    //arrange
+    final tData = fixture('dues_success.json');
+    when(mockSharedPreferences.getString(any)).thenReturn(tData);
+    //act
+    final result =await duesLocalDataSource.getDues();
+    //assert
+    verify(mockSharedPreferences.getString('dues'));
+    expect(result, isA<List<DuesModel>>());
+    
   });
 }
