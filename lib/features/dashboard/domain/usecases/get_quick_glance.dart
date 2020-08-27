@@ -1,16 +1,16 @@
 import 'package:mess_management_flutter/core/errors/failures.dart';
 import 'package:dartz/dartz.dart';
 import 'package:mess_management_flutter/core/usecases/usecase.dart';
+import 'package:mess_management_flutter/features/dashboard/domain/entities/quick_glance.dart';
 import 'package:mess_management_flutter/features/dashboard/domain/repositories/dash_board_repository.dart';
 import 'package:mess_management_flutter/features/login/domain/entities/user.dart';
 
-class GetUser extends UseCase<User,NoParams>{
+class GetQuickGlance extends UseCase<QuickGlance, NoParams> {
   final DashBoardRepository repository;
 
-  GetUser(this.repository);
+  GetQuickGlance(this.repository);
   @override
-  Future<Either<Failure, User>> call(NoParams params) {
-    return repository.getUser();
+  Future<Either<Failure, QuickGlance>> call(NoParams params) {
+    return repository.getQuickGlance();
   }
-  
 }

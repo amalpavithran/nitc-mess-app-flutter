@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:mess_management_flutter/features/dashboard/domain/entities/totals.dart';
 
-class TotalsModel {
+class TotalsModel extends Totals {
   final totalDailyCharge;
   final totalDaysDined;
   final totalExtra;
@@ -11,7 +12,12 @@ class TotalsModel {
     @required this.totalDaysDined,
     @required this.totalExtra,
     @required this.totalItems,
-  });
+  }) : super(
+          totalDailyCharge: totalDailyCharge,
+          totalDaysDined: totalDaysDined,
+          totalExtra: totalExtra,
+          totalItems: totalItems,
+        );
 
   factory TotalsModel.fromJson(Map<String, dynamic> json) {
     return TotalsModel(
