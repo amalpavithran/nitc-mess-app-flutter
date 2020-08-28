@@ -1,6 +1,7 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
-class Dues {
+class Dues extends Equatable{
   final String title;
   final String description;
   final DateTime date;
@@ -12,4 +13,7 @@ class Dues {
     @required this.date,
     @required this.price,
   });
+
+  @override
+  List<Object> get props => [];
 }

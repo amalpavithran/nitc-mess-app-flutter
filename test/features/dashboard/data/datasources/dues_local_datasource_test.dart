@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart';
 import 'package:mess_management_flutter/core/errors/exceptions.dart';
 import 'package:mess_management_flutter/features/dashboard/data/datasources/dues_local_datasource.dart';
 import 'package:mess_management_flutter/features/dashboard/data/models/dues_model.dart';
@@ -25,7 +24,6 @@ void main() {
     test('should return TotalsModel on successful call', () async {
       //arrange
       List<dynamic> tData = jsonDecode(fixture('dues_success.json'));
-      print(tData);
       final tTotals = TotalsModel.fromJsonDuesList(tData).toJson();
       when(mockSharedPreferences.setString(any, any))
           .thenAnswer((realInvocation) async => true);

@@ -5,10 +5,8 @@ import 'package:mess_management_flutter/features/dashboard/data/datasources/dues
 import 'package:mess_management_flutter/features/dashboard/data/datasources/dues_remote_datasource.dart';
 import 'package:mess_management_flutter/features/dashboard/domain/entities/dues.dart';
 import 'package:mess_management_flutter/features/dashboard/domain/entities/quick_glance.dart';
-import 'package:mess_management_flutter/features/dashboard/domain/entities/totals.dart';
 import 'package:mess_management_flutter/features/dashboard/domain/repositories/dash_board_repository.dart';
 import 'package:mess_management_flutter/features/login/data/datasources/auth_local_datasource.dart';
-import 'package:mess_management_flutter/features/login/domain/entities/user.dart';
 
 class DashboardRepositoryImpl implements DashBoardRepository {
   final DuesLocalDataSource duesLocalDataSource;
@@ -22,9 +20,11 @@ class DashboardRepositoryImpl implements DashBoardRepository {
   });
 
   @override
-  Future<Either<Failure, List<Dues>>> getDues() {
-    // TODO: implement getDues
-    throw UnimplementedError();
+  Future<Either<Failure, List<Dues>>> getDues() async{
+    final token  = await authLocalDataSource.getToken();
+    final json = await duesRemoteDataSource.fetchRawDues(token);
+    final result = await duesLocalDataSource.setDues(json);
+    return Right(result);
   }
 
   @override

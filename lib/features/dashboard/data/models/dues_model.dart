@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:mess_management_flutter/features/dashboard/domain/entities/dues.dart';
-import 'package:validators/sanitizers.dart';
 
 class DuesModel extends Dues {
   DuesModel({
