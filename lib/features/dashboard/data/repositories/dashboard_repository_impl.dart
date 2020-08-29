@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mess_management_flutter/core/errors/exceptions.dart';
 import 'package:mess_management_flutter/core/errors/failures.dart';
 import 'package:mess_management_flutter/features/dashboard/data/datasources/dues_local_datasource.dart';
 import 'package:mess_management_flutter/features/dashboard/data/datasources/dues_remote_datasource.dart';
@@ -20,11 +21,22 @@ class DashboardRepositoryImpl implements DashBoardRepository {
   });
 
   @override
-  Future<Either<Failure, List<Dues>>> getDues() async{
-    final token  = await authLocalDataSource.getToken();
-    final json = await duesRemoteDataSource.fetchRawDues(token);
-    final result = await duesLocalDataSource.setDues(json);
-    return Right(result);
+  Future<Either<Failure, List<Dues>>> getDues() async {
+    try {
+      final token = await authLocalDataSource.getToken();
+      final json = await duesRemoteDataSource.fetchRawDues(token);
+      final result = await duesLocalDataSource.setDues(json);
+      return Right(result);
+    } on ServerException {
+      return Left(ServerFailure());
+    } on UnauthorizedException {
+      return Left(UnauthorizedFailure());
+    } on NullException {
+      return Left(UnauthorizedFailure());
+    } catch (e) {
+      print(e);
+      return Left(UnexpectedFailure());
+    }
   }
 
   @override
@@ -33,6 +45,9 @@ class DashboardRepositoryImpl implements DashBoardRepository {
     throw UnimplementedError();
   }
 
-
-
+  @override
+  Future<Either<Failure, List<Dues>>> getDuesLocal() {
+    // TODO: implement getDuesLocal
+    throw UnimplementedError();
+  }
 }

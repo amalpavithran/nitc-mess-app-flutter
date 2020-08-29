@@ -5,5 +5,6 @@ import 'package:mess_management_flutter/features/dashboard/domain/entities/quick
 
 abstract class DashBoardRepository {
   Future<Either<Failure,List<Dues>>> getDues();
+  Future<Either<Failure,List<Dues>>> getDuesLocal();
   Future<Either<Failure,QuickGlance>> getQuickGlance();
 }
